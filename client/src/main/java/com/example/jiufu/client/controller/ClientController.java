@@ -25,6 +25,8 @@ public class ClientController {
         clientKeys = new LinkedList<>();
 
         clientKeys.add("李四");
+        clientKeys.add("张三");
+        clientKeys.add("上帝");
     }
 
     private Logger logger = LoggerFactory.getLogger(getClass());

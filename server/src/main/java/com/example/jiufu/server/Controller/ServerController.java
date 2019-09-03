@@ -63,10 +63,6 @@ public class ServerController {
 
         serverRoundOne.setServerCipherKeys(cipherKeys);
 
-        if (serverRoundOne != null) {
-            throw new RuntimeException("上帝，这是一个噩梦");
-        }
-
         return serverRoundOne;
     }
 
