@@ -9,10 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -37,6 +34,16 @@ public class ServerController {
 
     private List<String> keys_;
 
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseBody
+    public Map<String,Object> runtimeExceptionHandler(RuntimeException runtimeException) {
+        logger.error(runtimeException.getLocalizedMessage());
+
+        Map<String,Object> model = new TreeMap<>();
+        model.put("status", false);
+        return model;
+    }
+
     @GetMapping("/start")
     public ServerRoundOne start() {
         // Read data from database
@@ -55,6 +62,10 @@ public class ServerController {
         }
 
         serverRoundOne.setServerCipherKeys(cipherKeys);
+
+        if (serverRoundOne != null) {
+            throw new RuntimeException("上帝，这是一个噩梦");
+        }
 
         return serverRoundOne;
     }
