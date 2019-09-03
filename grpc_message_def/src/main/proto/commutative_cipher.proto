@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.jiufu.grpc_message_def";
+option java_outer_classname = "JiufuECCommutativeCipherRpc";
+option objc_class_prefix = "JCCRpc";
+
+package encryption;
+
+message commutative_cipher { string pk = 1; };
+
+message ClientMessage {
+  bytes pk = 1; // 设置当前加密需要的私钥
+  oneof text {
+    bytes plaintext = 2;    // 需要加密的原始数据
+    bytes ciphertext = 3;   // 二次加密的原始数据
+    bytes deciphertext = 4; // 解密
+  }
+}
+
+message ServerMessage {
+  bytes pk = 1; // 返回当前加密所用的私钥
+  oneof text {
+    bytes ciphertext = 2;  // 第1次加密后的结果
+    bytes ciphertext2 = 3; // 第2次加密后的结构
+    bytes deciphertext = 4; // 解密
+  }
+}
+
+// gRPC interface for Private Join and Compute.
+service ECCommutativeCipherRpc {
+  // Handles a single protocol round.
+  rpc Handle(ClientMessage) returns (ServerMessage) {}
+}

@@ -1,0 +1,63 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.7.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'java'
+	id 'com.google.protobuf' version '0.8.8'
+}
+
+group = 'com.example.jiufu'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	jcenter()
+}
+
+def grpcVersion = '1.23.0'
+def protobufVersion = '3.9.0'
+def protocVersion = protobufVersion
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
+
+	implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	compileOnly "javax.annotation:javax.annotation-api:1.2"
+	compile 'net.devh:grpc-client-spring-boot-starter:2.5.1.RELEASE'
+
+	// examples/advanced need this for JsonFormat
+	implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+	runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
+	testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+}
+
+protobuf {
+	protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+	plugins {
+		grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+	}
+	generateProtoTasks {
+		all()*.plugins { grpc {} }
+	}
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs 'build/generated/source/proto/main/grpc'
+			srcDirs 'build/generated/source/proto/main/java'
+		}
+	}
+}
+
+jar {
+	enabled = true
+}
+
+bootJar {
+	enabled = false
+}

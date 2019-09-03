@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/private_join_and_compute
+
+grpc:
+  client:
+    commutative-cipher-server:
+      address: 'static://127.0.0.1:50051'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+
+server:
+  port: 8081
+
+#mybatis:
+#  config-location: classpath:mybatis/mybatis-config.xml
+#  mapper-locations:
+#    - classpath:mybatis/mapper/*.xml

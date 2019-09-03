@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.jiufu.grpc_message_def";
+option java_outer_classname = "JiufuBlackListRpc";
+option objc_class_prefix = "JBLRpc";
+
+package private_compute;
+
+message StartProtocal {
+}
+
+message EndProtocal {
+}
+
+message ClientRoundOneMessage {
+    repeated bytes server_key = 1;
+    repeated bytes client_key = 2;
+}
+
+message ClientRoundTwoMessage {
+    repeated bytes client_key = 1;
+}
+
+message JavaClientMessage {
+    oneof protocal {
+        StartProtocal start_protocal = 1;
+        ClientRoundOneMessage round_one_message = 2;
+        ClientRoundTwoMessage round_two_message = 3;
+        EndProtocal end_protocal = 4;
+    }
+}
+
+message ServerRoundOneMsseage {
+    repeated bytes server_key = 1; 
+}
+
+message ServerRoundTwoMessage {
+    repeated bytes client_key = 1;
+}
+
+message JavaServerMessage {
+    oneof protocal {
+        ServerRoundOneMsseage round_one_message = 1;
+        ServerRoundTwoMessage round_two_message = 2;
+    }
+}
+
+service BlackListRpc {
+    rpc Handle(JavaClientMessage) returns(JavaServerMessage) { }
+}
