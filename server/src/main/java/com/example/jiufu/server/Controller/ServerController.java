@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @ComponentScan("com.example.jiufu.grpc_message_def")
@@ -53,10 +54,6 @@ public class ServerController {
 
         ByteString pk = ecCommutativeCipherRpcClient.GetPrivateKey();
 
-        serverRoundOne.setServerPrivateKey(UUID.randomUUID().toString());
-
-        redisTemplate.opsForValue().set(serverRoundOne.getServerPrivateKey(), pk.toByteArray());
-
         List<byte[]> cipherKeys = new LinkedList<>();
 
         for (String key : this.keys_) {
@@ -65,6 +62,11 @@ public class ServerController {
         }
 
         serverRoundOne.setServerCipherKeys(cipherKeys);
+        serverRoundOne.setServerPrivateKey(UUID.randomUUID().toString());
+
+        // 将服务器的private key 存储到缓存中
+        redisTemplate.opsForValue().set(serverRoundOne.getServerPrivateKey(), pk.toByteArray());
+        redisTemplate.expire(serverRoundOne.getServerPrivateKey(),30, TimeUnit.MINUTES);
 
         return serverRoundOne;
     }
