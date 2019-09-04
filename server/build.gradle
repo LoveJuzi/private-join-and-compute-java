@@ -15,8 +15,8 @@ repositories {
 dependencies {
 	compile project(':grpc_message_def')
 	compile project(':model')
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0'
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

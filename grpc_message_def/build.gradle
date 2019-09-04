@@ -33,6 +33,10 @@ dependencies {
 	implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
 	runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
 	testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0'
+	runtimeOnly 'mysql:mysql-connector-java'
 }
 
 protobuf {

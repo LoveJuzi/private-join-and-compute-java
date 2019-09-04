@@ -25,7 +25,7 @@ grpc:
       keepAliveWithoutCalls: true
       negotiationType: plaintext
 
-#mybatis:
-#  config-location: classpath:mybatis/mybatis-config.xml
-#  mapper-locations:
-#    - classpath:mybatis/mapper/*.xml
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations:
+    - classpath:mybatis/mapper/*.xml

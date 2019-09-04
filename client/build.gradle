@@ -20,4 +20,6 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	compile project(':grpc_message_def')
 	compile project(':model')
+
+
 }

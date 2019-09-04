@@ -1,5 +1,7 @@
 package com.example.jiufu.client.controller;
 
+import com.example.jiufu.client.mapper.ClientMapper;
+import com.example.jiufu.client.model.Client;
 import com.example.jiufu.grpc_message_def.client.ECCommutativeCipherRpcClient;
 import com.example.jiufu.model.ClientRoundOne;
 import com.example.jiufu.model.ServerRoundOne;
@@ -34,10 +36,15 @@ public class ClientController {
     @Autowired
     private ECCommutativeCipherRpcClient ecCommutativeCipherRpcClient;
 
+    @Autowired
+    private ClientMapper clientMapper;
+
     private List<String> clientKeys;
 
-    @GetMapping("/")
-    public List<String>  privateJoinAndCompute() {
+    @GetMapping("/blacklist")
+    public List<String> blacklist() {
+        List<Client> clientList = clientMapper.getAllClient();
+
         RestTemplate restTemplate = new RestTemplate();
 
         ServerRoundOne serverRoundOne = restTemplate.getForObject("http://127.0.0.1:8080/start", ServerRoundOne.class);
@@ -47,13 +54,13 @@ public class ClientController {
         List<byte[]> serverCipherKeys2 = new LinkedList<>();
         Map<ByteString, String> mapClientKeys = new HashMap<>();
 
-        for(String key : clientKeys) {
-            ByteString byteClientCipherKeys = ecCommutativeCipherRpcClient.Encrypt(pk, ByteString.copyFromUtf8(key));
+        for (Client client : clientList) {
+            ByteString byteClientCipherKeys = ecCommutativeCipherRpcClient.Encrypt(pk, ByteString.copyFromUtf8(client.getKey()));
             clientCipherKeys.add(byteClientCipherKeys.toByteArray());
-            mapClientKeys.put(byteClientCipherKeys, key);
+            mapClientKeys.put(byteClientCipherKeys, client.getKey());
         }
 
-        for(byte[] cipher : serverRoundOne.getServerCipherKeys()) {
+        for (byte[] cipher : serverRoundOne.getServerCipherKeys()) {
             serverCipherKeys2.add(ecCommutativeCipherRpcClient.ReEncrypt(pk, ByteString.copyFrom(cipher)).toByteArray());
         }
 
@@ -70,5 +77,10 @@ public class ClientController {
         }
 
         return blackist;
+    }
+
+    @GetMapping("/blackvalue")
+    public Integer blackvalue() {
+        return 0;
     }
 }

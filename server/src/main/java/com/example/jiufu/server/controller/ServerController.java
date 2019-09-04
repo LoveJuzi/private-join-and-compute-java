@@ -1,9 +1,11 @@
-package com.example.jiufu.server.Controller;
+package com.example.jiufu.server.controller;
 
 import com.example.jiufu.grpc_message_def.client.ECCommutativeCipherRpcClient;
 import com.example.jiufu.model.ClientRoundOne;
 import com.example.jiufu.model.ServerRoundOne;
 import com.example.jiufu.model.ServerRoundTwo;
+import com.example.jiufu.server.mapper.ServerMapper;
+import com.example.jiufu.server.modle.Server;
 import com.google.protobuf.ByteString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,20 +23,14 @@ public class ServerController {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ServerController() {
-        keys_ = new LinkedList<>();
-        keys_.add("张三");
-        keys_.add("李四");
-        keys_.add("王五");
-    }
+    @Autowired
+    private ServerMapper serverMapper;
 
     @Autowired
     private ECCommutativeCipherRpcClient ecCommutativeCipherRpcClient;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
-
-    private List<String> keys_;
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseBody
@@ -48,7 +44,7 @@ public class ServerController {
 
     @GetMapping("/start")
     public ServerRoundOne start() {
-        // Read data from database
+        List<Server> serverList = serverMapper.getAllServer();
 
         ServerRoundOne serverRoundOne = new ServerRoundOne();
 
@@ -56,8 +52,8 @@ public class ServerController {
 
         List<byte[]> cipherKeys = new LinkedList<>();
 
-        for (String key : this.keys_) {
-            ByteString cipher = ecCommutativeCipherRpcClient.Encrypt(pk, ByteString.copyFromUtf8(key));
+        for (Server server : serverList) {
+            ByteString cipher = ecCommutativeCipherRpcClient.Encrypt(pk, ByteString.copyFromUtf8(server.getKey()));
             cipherKeys.add(cipher.toByteArray());
         }
 
@@ -73,8 +69,6 @@ public class ServerController {
 
     @PostMapping("/calculate")
     public ServerRoundTwo calculate(@RequestBody ClientRoundOne clientRoundOne) {
-        logger.info(clientRoundOne.getClientCipherKeys().toString());
-
         List<ByteString> serverCipherKeys2 = new LinkedList<>();
         List<ByteString> clientCipherKeys2 = new LinkedList<>();
         Map<ByteString, byte[]> mapClientKeys = new HashMap<>();

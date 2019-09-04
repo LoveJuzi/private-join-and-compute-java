@@ -16,7 +16,7 @@ grpc:
 server:
   port: 8081
 
-#mybatis:
-#  config-location: classpath:mybatis/mybatis-config.xml
-#  mapper-locations:
-#    - classpath:mybatis/mapper/*.xml
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations:
+    - classpath:mybatis/mapper/*.xml
