@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -28,6 +29,9 @@ public class ServerController {
 
     @Autowired
     private ECCommutativeCipherRpcClient ecCommutativeCipherRpcClient;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     // 这个i变量应该是放到
     private ByteString pk_;
@@ -54,6 +58,8 @@ public class ServerController {
 
         serverRoundOne.setServerPrivateKey(this.pk_.toByteArray());
 
+        redisTemplate.opsForValue().set("1", this.pk_.toByteArray());
+
         List<byte[]> cipherKeys = new LinkedList<>();
 
         for (String key: this.keys_) {
@@ -78,8 +84,14 @@ public class ServerController {
             serverCipherKeys2.add(ByteString.copyFrom(serverCipherKey2));
         }
 
+        byte[] strPrivateKey = (byte[])redisTemplate.opsForValue().get("1");
+        if (strPrivateKey == null) {
+            return null;
+        }
         for(byte[] cipherKeys : clientRoundOne.getClientCipherKeys()) {
-            ByteString byteCipherKeys2 = ecCommutativeCipherRpcClient.ReEncrypt(ByteString.copyFrom(clientRoundOne.getServerPrivateKey()),
+            ByteString byteCipherKeys2 = ecCommutativeCipherRpcClient.ReEncrypt(
+//                    ByteString.copyFrom(clientRoundOne.getServerPrivateKey()),
+                    ByteString.copyFrom(strPrivateKey),
                     ByteString.copyFrom(cipherKeys));
             clientCipherKeys2.add(byteCipherKeys2);
             mapClientKeys.put(byteCipherKeys2, cipherKeys);
