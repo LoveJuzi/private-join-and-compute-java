@@ -5,7 +5,7 @@ import java.util.List;
 public class ClientRoundOne {
     private List<byte[]> clientCipherKeys;
     private List<byte[]> serverCipherKeys2;
-    private byte[] serverPrivateKey;
+    private String serverPrivateKey;
 
     public List<byte[]> getClientCipherKeys() {
         return clientCipherKeys;
@@ -23,11 +23,11 @@ public class ClientRoundOne {
         this.serverCipherKeys2 = serverCipherKeys2;
     }
 
-    public byte[] getServerPrivateKey() {
+    public String getServerPrivateKey() {
         return serverPrivateKey;
     }
 
-    public void setServerPrivateKey(byte[] serverPrivateKey) {
+    public void setServerPrivateKey(String serverPrivateKey) {
         this.serverPrivateKey = serverPrivateKey;
     }
 }

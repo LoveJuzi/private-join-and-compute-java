@@ -33,17 +33,14 @@ public class ServerController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    // 这个i变量应该是放到
-    private ByteString pk_;
-
     private List<String> keys_;
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseBody
-    public Map<String,Object> runtimeExceptionHandler(RuntimeException runtimeException) {
+    public Map<String, Object> runtimeExceptionHandler(RuntimeException runtimeException) {
         logger.error(runtimeException.getLocalizedMessage());
 
-        Map<String,Object> model = new TreeMap<>();
+        Map<String, Object> model = new TreeMap<>();
         model.put("status", false);
         return model;
     }
@@ -54,16 +51,16 @@ public class ServerController {
 
         ServerRoundOne serverRoundOne = new ServerRoundOne();
 
-        this.pk_ = ecCommutativeCipherRpcClient.GetPrivateKey();
+        ByteString pk = ecCommutativeCipherRpcClient.GetPrivateKey();
 
-        serverRoundOne.setServerPrivateKey(this.pk_.toByteArray());
+        serverRoundOne.setServerPrivateKey(UUID.randomUUID().toString());
 
-        redisTemplate.opsForValue().set("1", this.pk_.toByteArray());
+        redisTemplate.opsForValue().set(serverRoundOne.getServerPrivateKey(), pk.toByteArray());
 
         List<byte[]> cipherKeys = new LinkedList<>();
 
-        for (String key: this.keys_) {
-            ByteString cipher = ecCommutativeCipherRpcClient.Encrypt(this.pk_, ByteString.copyFromUtf8(key));
+        for (String key : this.keys_) {
+            ByteString cipher = ecCommutativeCipherRpcClient.Encrypt(pk, ByteString.copyFromUtf8(key));
             cipherKeys.add(cipher.toByteArray());
         }
 
@@ -84,14 +81,14 @@ public class ServerController {
             serverCipherKeys2.add(ByteString.copyFrom(serverCipherKey2));
         }
 
-        byte[] strPrivateKey = (byte[])redisTemplate.opsForValue().get("1");
-        if (strPrivateKey == null) {
+        byte[] pkBytes = (byte[]) redisTemplate.opsForValue().get(clientRoundOne.getServerPrivateKey());
+        if (pkBytes == null) {
             return null;
         }
-        for(byte[] cipherKeys : clientRoundOne.getClientCipherKeys()) {
+        ByteString pk = ByteString.copyFrom(pkBytes);
+        for (byte[] cipherKeys : clientRoundOne.getClientCipherKeys()) {
             ByteString byteCipherKeys2 = ecCommutativeCipherRpcClient.ReEncrypt(
-//                    ByteString.copyFrom(clientRoundOne.getServerPrivateKey()),
-                    ByteString.copyFrom(strPrivateKey),
+                    pk,
                     ByteString.copyFrom(cipherKeys));
             clientCipherKeys2.add(byteCipherKeys2);
             mapClientKeys.put(byteCipherKeys2, cipherKeys);
@@ -107,6 +104,8 @@ public class ServerController {
         ServerRoundTwo serverRoundTwo = new ServerRoundTwo();
 
         serverRoundTwo.setClientCipherKeys(clientCipherKeys);
+
+        redisTemplate.delete(clientRoundOne.getServerPrivateKey());
 
         return serverRoundTwo;
     }

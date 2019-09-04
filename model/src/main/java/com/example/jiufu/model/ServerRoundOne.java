@@ -4,14 +4,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ServerRoundOne {
-    private byte[] serverPrivateKey;
+    private String serverPrivateKey;
     private List<byte[]> serverCipherKeys = new LinkedList<>();
 
-    public byte[] getServerPrivateKey() {
+    public String getServerPrivateKey() {
         return serverPrivateKey;
     }
 
-    public void setServerPrivateKey(byte[] serverPrivateKey) {
+    public void setServerPrivateKey(String serverPrivateKey) {
         this.serverPrivateKey = serverPrivateKey;
     }
 
