@@ -1,9 +1,7 @@
 package com.example.jiufu.server.controller;
 
 import com.example.jiufu.grpc_message_def.client.ECCommutativeCipherRpcClient;
-import com.example.jiufu.model.ClientRoundOne;
-import com.example.jiufu.model.ServerRoundOne;
-import com.example.jiufu.model.ServerRoundTwo;
+import com.example.jiufu.model.*;
 import com.example.jiufu.server.mapper.ServerMapper;
 import com.example.jiufu.server.modle.Server;
 import com.google.protobuf.ByteString;
@@ -104,5 +102,45 @@ public class ServerController {
         redisTemplate.delete(clientRoundOne.getServerPrivateKey());
 
         return serverRoundTwo;
+    }
+
+    @PostMapping("/sum")
+    public ServerRoundTwo2 sum(@RequestBody ClientRoundOne2 clientRoundOne2) {
+        ServerRoundTwo2 serverRoundTwo2 = new ServerRoundTwo2();
+
+        List<ByteString> serverCipherKeys2 = new LinkedList<>();
+        List<ByteString> clientCipherKeys2 = new LinkedList<>();
+        Map<ByteString, byte[]> mapCipherDatas = new HashMap<>();
+
+        for (byte[] serverCipherKey2 : clientRoundOne2.getServerCipherKeys2()) {
+            serverCipherKeys2.add(ByteString.copyFrom(serverCipherKey2));
+        }
+
+        byte[] pkBytes = (byte[]) redisTemplate.opsForValue().get(clientRoundOne2.getServerPrivateKey());
+        if (pkBytes == null) {
+            return null;
+        }
+        ByteString pk = ByteString.copyFrom(pkBytes);
+        Iterator<byte[]> itr = clientRoundOne2.getClientCipherValues().iterator();
+        for (byte[] cipherKeys : clientRoundOne2.getClientCipherKeys()) {
+            ByteString byteCipherKeys2 = ecCommutativeCipherRpcClient.ReEncrypt(
+                    pk,
+                    ByteString.copyFrom(cipherKeys));
+            clientCipherKeys2.add(byteCipherKeys2);
+            mapCipherDatas.put(byteCipherKeys2, itr.next());
+        }
+
+        clientCipherKeys2.retainAll(serverCipherKeys2);
+        List<byte[]> cipherDatas = new LinkedList<>();
+        for (ByteString cipherKey2 : clientCipherKeys2) {
+            cipherDatas.add(mapCipherDatas.get(cipherKey2));
+        }
+
+        List<byte[]> refCipherSum = new Vector<>();
+        ecCommutativeCipherRpcClient.AddList(clientRoundOne2.getClientPublicKey(), cipherDatas, refCipherSum);
+
+        serverRoundTwo2.setCipherSum(refCipherSum.get(0));
+
+        return serverRoundTwo2;
     }
 }

@@ -3,11 +3,37 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.example.jiufu.grpc_message_def";
 option java_outer_classname = "JiufuECCommutativeCipherRpc";
-option objc_class_prefix = "JCCRpc";
+option objc_class_prefix = "JECCCRpc";
 
 package encryption;
 
 message commutative_cipher { string pk = 1; };
+
+message paillier_generate_pqkey_climsg {
+  uint32 modulus_size = 1;
+}
+
+message paillier_generate_pubkey_climsg {
+  bytes p = 1;
+  bytes q = 2;
+}
+
+message paillier_encrypt_list_climsg {
+  bytes p = 1;
+  bytes q = 2;
+  repeated uint64 datas = 3;
+}
+
+message paillier_add_list_climsg {
+  bytes pubkey = 1;
+  repeated bytes cipherDatas = 2;
+}
+
+message paillier_decrpyt_climsg {
+  bytes p = 1;
+  bytes q = 2;
+  bytes cipherData = 3;
+}
 
 message ClientMessage {
   bytes pk = 1; // 设置当前加密需要的私钥
@@ -15,15 +41,46 @@ message ClientMessage {
     bytes plaintext = 2;    // 需要加密的原始数据
     bytes ciphertext = 3;   // 二次加密的原始数据
     bytes deciphertext = 4; // 解密
+    paillier_generate_pqkey_climsg paillier_generate_pqkey = 5;
+    paillier_generate_pubkey_climsg paillier_generate_pubkey = 6;
+    paillier_encrypt_list_climsg paillier_enrcpyt_list = 7;
+    paillier_add_list_climsg paillier_add_list = 8;
+    paillier_decrpyt_climsg paillier_decrpyt = 9;
   }
+}
+
+message paillier_generate_pqkey_srvmsg {
+  bytes p = 1;
+  bytes q = 2;
+}
+
+message paillier_generate_pubkey_srvmsg {
+  bytes pubkey = 1;
+}
+
+message paillier_encrypt_list_srvmsg {
+  repeated bytes cipherDatas = 1;
+}
+
+message paillier_add_list_srvmsg {
+  bytes cipherSum = 1;
+}
+
+message paillier_decrpyt_srvmsg {
+  uint64 data = 1;
 }
 
 message ServerMessage {
   bytes pk = 1; // 返回当前加密所用的私钥
   oneof text {
-    bytes ciphertext = 2;  // 第1次加密后的结果
-    bytes ciphertext2 = 3; // 第2次加密后的结构
+    bytes ciphertext = 2;   // 第1次加密后的结果
+    bytes ciphertext2 = 3;  // 第2次加密后的结构
     bytes deciphertext = 4; // 解密
+    paillier_generate_pqkey_srvmsg paillier_generate_pqkey = 5;
+    paillier_generate_pubkey_srvmsg paillier_generate_pubkey = 6;
+    paillier_encrypt_list_srvmsg paillier_enrcpyt_list = 7;
+    paillier_add_list_srvmsg paillier_add_list = 8;
+    paillier_decrpyt_srvmsg paillier_decrpyt = 9;
   }
 }
 
